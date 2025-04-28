@@ -1,0 +1,28 @@
+# Base requirements
+flask==2.2.5
+flask-sqlalchemy==3.1.1
+flask-migrate==4.0.5
+flask-cors==4.0.0
+Jinja2>=3.0.1
+Werkzeug>=2.0.1
+SQLAlchemy>=1.4.23
+alembic>=1.7.1
+click>=8.0.1
+requests>=2.26.0
+PyYAML>=6.0
+python-dotenv==0.19.0
+gunicorn==21.2.0
+
+# Testing requirements
+pytest>=6.2.5
+coverage>=6.0.1
+
+# Data processing and visualization (optional)
+numpy>=1.21.2
+matplotlib>=3.4.3
+scikit-learn>=1.0
+memory-profiler>=0.58.0
+
+# Networking and tunneling (optional)
+# pyngrok>=5.1.0 - Removed as ngrok is not free for extended use
+# Consider using Render.com for free hosting instead
