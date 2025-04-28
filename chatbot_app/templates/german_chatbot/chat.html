@@ -1,0 +1,73 @@
+{% extends 'german_chatbot/base.html' %}
+
+{% block content %}
+<div class="chat-container p-3">
+    <div id="messages" class="mb-5">
+        {% for message in messages %}
+            <div class="message {% if message.is_user %}user-message{% else %}bot-message{% endif %}">
+                {{ message.text }}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="input-group">
+    <input type="text" id="message-input" class="form-control" placeholder="Schreiben Sie Ihre Nachricht...">
+    <button class="btn btn-primary" id="send-button">Senden</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const messagesContainer = document.getElementById('messages');
+    
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+            // Add user message to chat
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.textContent = message;
+            messagesContainer.appendChild(userMessageDiv);
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Send message to server
+            fetch('{% url "german_chatbot:send_message" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `message=${encodeURIComponent(message)}&conversation_id={{ conversation.id }}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Add bot response to chat
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'message bot-message';
+                botMessageDiv.textContent = data.response;
+                messagesContainer.appendChild(botMessageDiv);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+    }
+    
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+});
+</script>
+{% endblock %} 

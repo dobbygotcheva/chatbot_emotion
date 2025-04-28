@@ -1,0 +1,90 @@
+{% extends 'german_chatbot/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Vokabeln üben</h3>
+            </div>
+            <div class="card-body">
+                {% if word %}
+                    <div class="text-center mb-4">
+                        <h4>{{ word.word }}</h4>
+                        <p class="text-muted">{{ word.part_of_speech }}</p>
+                        <p class="fst-italic">{{ word.example_sentence }}</p>
+                    </div>
+                    
+                    <form id="translation-form">
+                        <input type="hidden" id="word-id" value="{{ word.id }}">
+                        <div class="mb-3">
+                            <label for="translation" class="form-label">Übersetzung:</label>
+                            <input type="text" class="form-control" id="translation" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Überprüfen</button>
+                    </form>
+                    
+                    <div id="result" class="mt-3 text-center" style="display: none;">
+                        <div id="correct-result" class="alert alert-success" style="display: none;">
+                            Richtig! Gut gemacht!
+                        </div>
+                        <div id="incorrect-result" class="alert alert-danger" style="display: none;">
+                            Falsch. Die richtige Übersetzung ist: <span id="correct-answer"></span>
+                        </div>
+                        <button id="next-word" class="btn btn-secondary mt-2">Nächstes Wort</button>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        Keine Vokabeln zum Üben verfügbar.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('translation-form');
+    const resultDiv = document.getElementById('result');
+    const correctResult = document.getElementById('correct-result');
+    const incorrectResult = document.getElementById('incorrect-result');
+    const correctAnswer = document.getElementById('correct-answer');
+    const nextWordButton = document.getElementById('next-word');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const wordId = document.getElementById('word-id').value;
+        const translation = document.getElementById('translation').value;
+        
+        fetch('{% url "german_chatbot:check_translation" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `word_id=${wordId}&translation=${encodeURIComponent(translation)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            resultDiv.style.display = 'block';
+            if (data.correct) {
+                correctResult.style.display = 'block';
+                incorrectResult.style.display = 'none';
+            } else {
+                correctResult.style.display = 'none';
+                incorrectResult.style.display = 'block';
+                correctAnswer.textContent = data.actual_translation;
+            }
+        });
+    });
+    
+    nextWordButton.addEventListener('click', function() {
+        window.location.reload();
+    });
+});
+</script>
+{% endblock %} 

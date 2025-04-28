@@ -1,0 +1,124 @@
+{% extends 'nlp_mining/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Analysis Results for: {{ document.title }}</h2>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3>Document Summary</h3>
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ summary }}</p>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3>Sentiment Analysis</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Positive</h5>
+                                <p class="card-text">{{ sentiment.pos|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Negative</h5>
+                                <p class="card-text">{{ sentiment.neg|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Neutral</h5>
+                                <p class="card-text">{{ sentiment.neu|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Compound</h5>
+                                <p class="card-text">{{ sentiment.compound|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3>Identified Topics</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for topic in topics %}
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Topic {{ forloop.counter }}</h5>
+                                <p class="card-text">{{ topic }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3>Named Entities</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for entity, type in entities %}
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ entity }}</h5>
+                                <p class="card-text"><span class="badge bg-info">{{ type }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3>Part-of-Speech Tags (First 50)</h3>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Tag</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for word, tag in pos_tags %}
+                        <tr>
+                            <td>{{ word }}</td>
+                            <td><span class="badge bg-secondary">{{ tag }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

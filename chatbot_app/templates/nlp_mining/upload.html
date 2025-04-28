@@ -1,0 +1,21 @@
+{% extends 'nlp_mining/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>Upload Text Document</h2>
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Title</label>
+                {{ form.title }}
+            </div>
+            <div class="mb-3">
+                <label for="id_content" class="form-label">Content</label>
+                {{ form.content }}
+            </div>
+            <button type="submit" class="btn btn-primary">Upload and Analyze</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

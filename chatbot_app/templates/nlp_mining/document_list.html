@@ -1,0 +1,31 @@
+{% extends 'nlp_mining/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Your Documents</h2>
+            <a href="{% url 'nlp_mining:upload_document' %}" class="btn btn-primary">Upload New Document</a>
+        </div>
+
+        {% if documents %}
+            <div class="list-group">
+                {% for document in documents %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-1">{{ document.title }}</h5>
+                            <small class="text-muted">{{ document.uploaded_at|date:"F j, Y" }}</small>
+                        </div>
+                        <p class="mb-1">{{ document.content|truncatechars:200 }}</p>
+                        <a href="{% url 'nlp_mining:analyze_document' document.id %}" class="btn btn-sm btn-info">View Analysis</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                You haven't uploaded any documents yet. <a href="{% url 'nlp_mining:upload_document' %}">Upload your first document</a> to get started!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

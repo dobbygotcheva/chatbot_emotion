@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion-Aware Chatbot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('../static/images/flammen.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0);  /* Changed to fully transparent */
+            z-index: -1;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(20, 10, 10, 0.85) 0%, rgba(60, 30, 30, 0.75) 50%, rgba(20, 10, 10, 0.85) 100%);
+            border-radius: 15px;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            animation: container-pulse 4s infinite alternate;
+        }
+
+        @keyframes container-pulse {
+            0% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 0, 0, 0.2); }
+            100% { box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(255, 115, 0, 0.3); }
+        }
+
+        .message {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 12px;
+            max-width: 80%;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .message:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+        }
+        .user-message {
+            background-color: rgba(150, 70, 70, 0.9);
+            margin-left: auto;
+            color: #0b0808;
+            border-left: 4px solid #ff004d;
+        }
+        .bot-message {
+            background-color: rgba(180, 120, 100, 0.9);
+            margin-right: auto;
+            color: #000000;
+            border-left: 4px solid #c10303;
+        }
+        .emotion-indicator {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #201010;
+        }
+        .emotion-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            object-fit: cover;
+            border: 3px solid rgba(218, 201, 201, 0.81);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background-color: rgba(45, 45, 45, 0.8);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+        .input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0.3rem;
+            background-color: rgba(6, 4, 4, 0.74);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+            animation: glow 2s infinite alternate;
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); }
+            100% { box-shadow: 0 0 20px rgba(255, 115, 0, 0.5); }
+        }
+        .form-control {
+            background-color: rgba(140, 116, 116, 0.8);
+            border: 2px solid #695d5d;
+            border-radius: 8px;
+            color: #000000;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            height: 38px;
+        }
+        .form-control:focus, .form-control:not(:placeholder-shown) {
+            background-color: rgba(215, 190, 190, 0.9);
+            border-color: #ff5722;
+            color: #000000;
+            box-shadow: 0 0 10px rgba(255, 87, 34, 0.5);
+            transform: translateY(-2px);
+        }
+        .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.6);
+            font-style: italic;
+        }
+        .chat-form {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+        .input-field-wrapper {
+            position: relative;
+            flex-grow: 1;
+        }
+        .input-glow {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 10px;
+            background: transparent;
+            z-index: -1;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+            animation: input-pulse 2s infinite alternate;
+        }
+        @keyframes input-pulse {
+            0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(255, 115, 0, 0.5); }
+            100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.3); }
+        }
+        .btn-primary {
+            background: linear-gradient(to bottom, #ff3019 0%, #b60c16 100%);
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            font-size: 0.9rem;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to bottom, #ff6800 0%, #b60c16 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+        }
+        .typing-indicator {
+            display: none;
+            margin: 1rem 0;
+            padding: 1rem;
+            background-color: rgba(74, 74, 74, 0.5);
+            border-radius: 10px;
+            color: #220707;
+        }
+        .typing-indicator span {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .confidence-bar {
+            height: 4px;
+            background-color: rgba(74, 74, 74, 0.3);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        .confidence-level {
+            height: 100%;
+            background-color: #ff5722;
+            transition: width 0.3s ease;
+        }
+        .app-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff7300;
+            font-family: 'Metal Mania', cursive;
+            font-size: 2.8rem;
+            letter-spacing: 3px;
+            position: relative;
+            padding-bottom: 15px;
+            transform: perspective(500px) rotateX(10deg);
+            -webkit-background-clip: text;
+            background-clip: text;
+            background-image: linear-gradient(to bottom, #ff0000, #770000);
+            text-transform: uppercase;
+            animation: metalShine 3s infinite alternate;
+        }
+
+        @keyframes metalShine {
+            0% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff7300; }
+            50% { text-shadow: 0 0 15px #ff0000, 0 0 25px #ff0000, 0 0 35px #ff0000, 0 0 45px #ff7300, 0 0 55px #ff7300; }
+            100% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff7300; }
+        }
+        .app-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(to right, transparent, #ff0000, #ff7300, #ff0000, transparent);
+            box-shadow: 0 0 10px #ff0000, 0 0 20px #ff7300;
+            animation: pulsate 2s infinite alternate;
+        }
+
+        @keyframes pulsate {
+            0% { opacity: 0.7; width: 180px; }
+            100% { opacity: 1; width: 220px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-container" id="chat-container">
+            <h2 class="app-title">Emotion-Aware Chatbot</h2>
+            <div id="chat-messages"></div>
+            <div class="typing-indicator" id="typing-indicator">
+                Bot is typing<span>.</span><span>.</span><span>.</span>
+            </div>
+        </div>
+    </div>
+    <div class="input-container">
+        <div class="input-wrapper">
+            <form id="chat-form" class="chat-form">
+                <div class="input-field-wrapper">
+                    <input type="text" id="user-input" class="form-control" placeholder="Type your message...">
+                    <div class="input-glow"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const chatContainer = document.getElementById("chat-container");
+
+        // Function to scroll to the bottom of the chat container
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Function to get the correct image path
+        function getImagePath(imagePath) {
+            // If the path already starts with a slash, use it as is
+            if (imagePath.startsWith('/')) {
+                return imagePath;
+            }
+            // If the path starts with "../alcohol/", replace it with "/static/alcohol/"
+            else if (imagePath.startsWith('../alcohol/')) {
+                return imagePath.replace('../alcohol/', '/static/alcohol/');
+            }
+            // Otherwise, prepend "/static/images/"
+            else {
+                return `/static/images/${imagePath}`;
+            }
+        }
+
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = "message " + (isUser ? 'user-message' : 'bot-message');
+
+            if (isUser) {
+                messageDiv.textContent = message;
+            } else {
+                const response = JSON.parse(message);
+                let messageHTML = "<div>" + response.response + "</div>";
+
+                // Get the image path
+                const imagePath = getImagePath(response.image);
+
+                // Check if hide_emotion is true
+                if (response.hide_emotion === true) {
+                    // Only show image if it's a drink image (not an emotion image)
+                    if (response.image && (response.image.includes('alcohol/') || response.image.startsWith('/static/alcohol/'))) {
+                        messageHTML += 
+                            "<div class='emotion-indicator'>" +
+                                "<img src='" + imagePath + "' class='emotion-image' alt='Recommended Drink'>" +
+                            "</div>";
+                    }
+                    // Otherwise, don't show any image
+                } 
+                // Only show emotion indicator and confidence bar if hide_emotion is not true
+                // If hide_emotion is undefined (older responses), default to showing emotions
+                else if (response.hide_emotion === undefined || !response.hide_emotion) {
+                    messageHTML += 
+                        "<div class='emotion-indicator'>" +
+                            "<img src='" + imagePath + "' class='emotion-image' alt='" + response.emotion + "'>" +
+                            "<span>" + response.emotion + " (" + Math.round((response.all_emotions[response.emotion] || 0) * 100) + "%)</span>" +
+                        "</div>" +
+                        "<div class='confidence-bar'>" +
+                            "<div class='confidence-level' style='width: " + ((response.all_emotions[response.emotion] || 0) * 100) + "%'></div>" +
+                        "</div>";
+                }
+
+                messageDiv.innerHTML = messageHTML;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            userInput.value = '';
+            // Scroll to bottom after user sends a message
+            scrollToBottom();
+            typingIndicator.style.display = 'block';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                typingIndicator.style.display = 'none';
+                addMessage(JSON.stringify(data));
+                // Scroll to bottom after receiving a response
+                scrollToBottom();
+            } catch (error) {
+                console.error('Error:', error);
+                typingIndicator.style.display = 'none';
+                addMessage(JSON.stringify({
+                    response: "I'm sorry, I encountered an error. Please try again.",
+                    emotion: "neutral",
+                    confidence: 0,
+                    image: "neutral.jpg",
+                    all_emotions: {"neutral": 1.0},
+                    hide_emotion: false
+                }));
+                // Scroll to bottom after error message
+                scrollToBottom();
+            }
+        });
+
+        // Initial scroll to bottom when page loads
+        window.onload = scrollToBottom;
+    </script>
+</body>
+</html>

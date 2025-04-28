@@ -1,0 +1,32 @@
+{% extends 'nlp_mining/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Entity Analysis</h2>
+        <p class="lead">Discover the most frequently mentioned entities across your documents</p>
+        
+        {% if entities %}
+            <div class="row">
+                {% for entity, count in entities %}
+                    <div class="col-md-3 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h4 class="card-title">{{ entity.0 }}</h4>
+                                <p class="card-text">
+                                    <span class="badge bg-info">{{ entity.1 }}</span>
+                                    <span class="badge bg-secondary ms-2">Count: {{ count }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No entities have been identified yet. Upload some documents to get started!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

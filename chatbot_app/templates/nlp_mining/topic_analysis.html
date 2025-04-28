@@ -1,0 +1,43 @@
+{% extends 'nlp_mining/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Topic Analysis</h2>
+        <p class="lead">Discover the main themes across your documents</p>
+        
+        {% if topics %}
+            <div class="row">
+                {% for topic in topics %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h4>Topic: {{ topic.name }}</h4>
+                            </div>
+                            <div class="card-body">
+                                <h5>Related Documents:</h5>
+                                <ul class="list-group list-group-flush">
+                                    {% for doc in topic.documents.all %}
+                                        <li class="list-group-item">
+                                            <a href="{% url 'nlp_mining:analyze_document' doc.id %}">
+                                                {{ doc.title }}
+                                            </a>
+                                            <small class="text-muted d-block">
+                                                {{ doc.uploaded_at|date:"F j, Y" }}
+                                            </small>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No topics have been identified yet. Upload some documents to get started!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
